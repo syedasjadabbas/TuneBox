@@ -42,5 +42,3 @@ flutter run
 * `.gitignore` prevents uploading temporary or auto-generated files like `build/`, `.dart_tool/`, `.idea/`, etc.
 
 
-
-Do you want me to make that enhanced version too?
