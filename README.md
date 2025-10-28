@@ -1,16 +1,46 @@
-# tunebox
+# TuneBox
 
-A new Flutter project.
+**TuneBox** is a Flutter-based mobile app for music playback.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+* Play local and online music.
+* Favorites section for quick access.
+* Trending songs display.
 
-A few resources to get you started if this is your first Flutter project:
+## Installation
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+1. Clone the repo:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+git clone https://github.com/syedasjadabbas/TuneBox.git
+```
+
+2. Navigate into the project:
+
+```
+cd TuneBox
+```
+
+3. Get dependencies:
+
+```
+flutter pub get
+```
+
+4. Run the app:
+
+```
+flutter run
+```
+
+## Notes
+
+* Do **not include the `build/` folder**. Flutter will generate it automatically.
+* Ensure you have Flutter installed: [Flutter setup guide](https://flutter.dev/docs/get-started/install).
+* Project size after cleanup: ~83.7 MB.
+* `.gitignore` prevents uploading temporary or auto-generated files like `build/`, `.dart_tool/`, `.idea/`, etc.
+
+
+
+Do you want me to make that enhanced version too?
