@@ -13,13 +13,34 @@ class SongDataController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
-    getLocalSongs();
-    //storagePermission();
+    initLocalSongs();
   }
 
-  void getLocalSongs() async {
+  Future<void> initLocalSongs() async {
+    // Request permissions before querying songs to avoid runtime crash
+    try {
+      // OnAudioQuery has its own permission helper
+      if (!await audioQuery.permissionsStatus()) {
+        final granted = await audioQuery.permissionsRequest();
+        if (!granted) {
+          return;
+        }
+      }
+
+      // Extra safety: request modern media permissions (Android 13+) and legacy storage
+      await Permission.audio.request();
+      await Permission.photos.request();
+      await Permission.videos.request();
+      await Permission.storage.request();
+
+      await getLocalSongs();
+    } catch (e) {
+      print('Error requesting media permission: $e');
+    }
+  }
+
+  Future<void> getLocalSongs() async {
     localSongList.value = await audioQuery.querySongs(
       ignoreCase: true,
       orderType: OrderType.ASC_OR_SMALLER,
@@ -51,25 +72,5 @@ class SongDataController extends GetxController {
     currentSongPlayingIndex.value = currentSongPlayingIndex.value - 1;
     SongModel nextSong = localSongList[currentSongPlayingIndex.value];
     songplayercontroller.playLocalAudio(nextSong);
-  }
-
-  void storagePermission() async {
-    try {
-      var status = await Permission.storage.status;
-      if (status.isGranted) {
-        print('Storage permission already granted');
-        getLocalSongs();
-      } else {
-        var result = await Permission.storage.request();
-        if (result.isGranted) {
-          print('Storage permission granted');
-          getLocalSongs();
-        } else {
-          print('Storage permission denied');
-        }
-      }
-    } catch (e) {
-      print('Error requesting storage permission: $e');
-    }
   }
 }
