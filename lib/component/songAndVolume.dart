@@ -23,62 +23,93 @@ class _SongAndVolumeState extends State<SongAndVolume> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Obx(() => Column(
-                      children: [
-                        const Icon(
-                          Icons.music_note,
-                          size: 80,
-                          color: Colors.blue,
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Now Playing',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        Text(
-                          '${songplayercontroller.currentSongTitle.value}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    )),
-                const SizedBox(height: 30),
-                Obx(() {
-                  final duration = songplayercontroller.player.duration;
-                  final position = songplayercontroller.player.position;
-
-                  double max = duration?.inSeconds.toDouble() ?? 0;
-                  double currentPosition = position.inSeconds.toDouble();
-                  currentPosition = currentPosition.clamp(0, max);
-
-                  return Column(
+          Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [gradient_start, gradient_end],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            songplayercontroller.currentTime.value,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.keyboard_arrow_down,
+                                color: Colors.white),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Slider(
+                          Text(
+                            "Now Playing",
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(color: Colors.white),
+                          ),
+                          const SizedBox(width: 48),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      _ArtworkPlaceholder(),
+                      const SizedBox(height: 20),
+                      Obx(
+                        () => Column(
+                          children: [
+                            Text(
+                              songplayercontroller.currentSongTitle.value.isEmpty
+                                  ? "Unknown Track"
+                                  : songplayercontroller.currentSongTitle.value,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(fontSize: 22),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              songplayercontroller.currentArtist.value.isEmpty
+                                  ? "Unknown Artist"
+                                  : songplayercontroller.currentArtist.value,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: label_color),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Obx(() {
+                        final duration = songplayercontroller.player.duration;
+                        final position = songplayercontroller.player.position;
+
+                        double max = duration?.inSeconds.toDouble() ?? 0;
+                        double currentPosition = position.inSeconds.toDouble();
+                        currentPosition = currentPosition.clamp(0, max);
+
+                        return Column(
+                          children: [
+                            Slider(
                               value: currentPosition,
                               min: 0,
                               max: max,
@@ -91,142 +122,111 @@ class _SongAndVolumeState extends State<SongAndVolume> {
                                 songplayercontroller
                                     .changeDurationToSecond(value.toInt());
                               },
-                              activeColor: Colors.blue,
-                              inactiveColor: Colors.blue.withOpacity(0.5),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  songplayercontroller.currentTime.value,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                Text(
+                                  songplayercontroller.totalTime.value,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ],
+                        );
+                      }),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.skip_previous_rounded),
+                            iconSize: 40,
+                            color: Colors.white,
+                            onPressed: () {
+                              songDataController.playPreviousSong();
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          Obx(
+                            () => ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primary_color,
+                                shape: const CircleBorder(),
+                                padding: const EdgeInsets.all(18),
+                              ),
+                              onPressed: () {
+                                if (songplayercontroller.isPlaying.value) {
+                                  songplayercontroller.pausePlaying();
+                                } else {
+                                  songplayercontroller.resumePlaying();
+                                }
+                              },
+                              child: Icon(
+                                songplayercontroller.isPlaying.value
+                                    ? Icons.pause
+                                    : Icons.play_arrow,
+                                size: 32,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          Text(
-                            songplayercontroller.totalTime.value,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
+                          const SizedBox(width: 12),
+                          IconButton(
+                            icon: const Icon(Icons.skip_next_rounded),
+                            iconSize: 40,
+                            color: Colors.white,
+                            onPressed: () {
+                              songDataController.playNextSong();
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Obx(
+                            () => _CircleIconButton(
+                              icon: songplayercontroller.isShuffled.value
+                                  ? Icons.shuffle_on
+                                  : Icons.shuffle,
+                              active: songplayercontroller.isShuffled.value,
+                              onTap: () => songplayercontroller.playRandomSong(),
                             ),
+                          ),
+                          Obx(
+                            () => _CircleIconButton(
+                              icon: songplayercontroller.isLoop.value
+                                  ? Icons.repeat_on
+                                  : Icons.repeat_one,
+                              active: songplayercontroller.isLoop.value,
+                              onTap: () => songplayercontroller.setLoopSong(),
+                            ),
+                          ),
+                          _CircleIconButton(
+                            icon: Icons.volume_up,
+                            active: false,
+                            onTap: () =>
+                                _showVolumeDialog(context, songplayercontroller),
+                          ),
+                          _CircleIconButton(
+                            icon: Icons.favorite_border,
+                            active: false,
+                            onTap: () {},
                           ),
                         ],
                       ),
                       const SizedBox(height: 20),
                     ],
-                  );
-                }),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.skip_previous),
-                      iconSize: 40,
-                      color: Colors.blue,
-                      onPressed: () {
-                        songDataController.playPreviousSong();
-                      },
-                    ),
-                    Obx(
-                      () => IconButton(
-                        icon: Icon(
-                          songplayercontroller.isPlaying.value
-                              ? Icons.pause
-                              : Icons.play_arrow,
-                        ),
-                        iconSize: 60,
-                        color: Colors.blue,
-                        onPressed: () {
-                          if (songplayercontroller.isPlaying.value) {
-                            songplayercontroller.pausePlaying();
-                          } else {
-                            songplayercontroller.resumePlaying();
-                          }
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.skip_next),
-                      iconSize: 40,
-                      color: Colors.blue,
-                      onPressed: () {
-                        songDataController.playNextSong();
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Positioned(
-            top: 40,
-            left: 0,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              color: Colors.blue,
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            ),
-          ),
-          Positioned(
-            top: 40,
-            right: 0,
-            child: IconButton(
-              icon: const Icon(Icons.settings),
-              color: Colors.blue,
-              onPressed: () {},
-            ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Obx(
-                  () => IconButton(
-                    icon: Icon(
-                      songplayercontroller.isShuffled.value
-                          ? Icons.shuffle
-                          : Icons.shuffle_outlined,
-                    ),
-                    iconSize: 30,
-                    color: songplayercontroller.isShuffled.value
-                        ? Colors.blue
-                        : label_color,
-                    onPressed: () {
-                      songplayercontroller.playRandomSong();
-                    },
                   ),
                 ),
-                Obx(
-                  () => IconButton(
-                    icon: Icon(
-                      songplayercontroller.isLoop.value
-                          ? Icons.repeat
-                          : Icons.repeat_one,
-                    ),
-                    iconSize: 30,
-                    color: songplayercontroller.isLoop.value
-                        ? Colors.blue
-                        : label_color,
-                    onPressed: () {
-                      songplayercontroller.setLoopSong();
-                    },
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.volume_up),
-                  iconSize: 30,
-                  color: Colors.blue,
-                  onPressed: () {
-                    _showVolumeDialog(context, songplayercontroller);
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.favorite),
-                  iconSize: 30,
-                  color: Colors.blue,
-                  onPressed: () {},
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -276,6 +276,56 @@ class _SongAndVolumeState extends State<SongAndVolume> {
           ],
         );
       },
+    );
+  }
+}
+
+class _ArtworkPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 260,
+      decoration: BoxDecoration(
+        color: div_color,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.album,
+          color: primary_color,
+          size: 70,
+        ),
+      ),
+    );
+  }
+}
+
+class _CircleIconButton extends StatelessWidget {
+  final IconData icon;
+  final bool active;
+  final VoidCallback onTap;
+  const _CircleIconButton(
+      {required this.icon, required this.active, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: active
+              ? primary_color.withOpacity(0.18)
+              : Colors.white.withOpacity(0.08),
+        ),
+        child: Icon(
+          icon,
+          color: active ? primary_color : Colors.white,
+        ),
+      ),
     );
   }
 }

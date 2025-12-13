@@ -1,12 +1,14 @@
 import 'package:get/get.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:music_player/model/mySongModel.dart';
+import 'package:music_player/model/song_item.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
 class Songplayercontroller extends GetxController {
   final player = AudioPlayer();
   RxBool isPlaying = false.obs;
   var currentSongTitle = ''.obs;
+  RxString currentArtist = ''.obs;
   RxString currentTime = "0:00".obs;
   RxString totalTime = "0:00".obs;
   RxBool isLoop = false.obs;
@@ -28,6 +30,8 @@ class Songplayercontroller extends GetxController {
       await player.setAudioSource(AudioSource.uri(Uri.parse(song.data)));
       player.play();
       isPlaying.value = true;
+       currentSongTitle.value = song.title;
+       currentArtist.value = song.artist ?? "";
       updatePosition();
     } catch (e) {
       print("Error playing local audio: $e");
@@ -39,9 +43,24 @@ class Songplayercontroller extends GetxController {
       await player.setAudioSource(AudioSource.uri(Uri.parse(song.data)));
       player.play();
       isPlaying.value = true;
+      currentSongTitle.value = song.title;
+      currentArtist.value = "Cloud track";
       updatePosition();
     } catch (e) {
       print("Error playing cloud audio: $e");
+    }
+  }
+
+  Future<void> playUnifiedSong(UnifiedSong song) async {
+    try {
+      await player.setAudioSource(AudioSource.uri(Uri.parse(song.data)));
+      player.play();
+      isPlaying.value = true;
+      currentSongTitle.value = song.title;
+      currentArtist.value = song.artist ?? "";
+      updatePosition();
+    } catch (e) {
+      print("Error playing unified audio: $e");
     }
   }
 

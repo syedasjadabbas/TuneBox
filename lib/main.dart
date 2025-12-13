@@ -1,13 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:music_player/component/songAndVolume.dart';
 import 'package:music_player/config/theme.dart';
 import 'package:music_player/firebase_options.dart';
-
-//import 'package:music_player/pages/play_song_page.dart';
-import 'package:music_player/pages/song_page.dart';
-//import 'package:music_player/pages/splash_screen.dart';
+import 'package:music_player/pages/root_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +23,7 @@ class MyApp extends StatelessWidget {
       title: 'Flutter Demo',
       theme: darkTheme,
       debugShowCheckedModeBanner: false,
-      home: const SongPage(),
+      home: const RootShell(),
     );
   }
 }
