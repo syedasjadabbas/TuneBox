@@ -2,7 +2,7 @@ name: music_player
 description: "A new Flutter project."
 
 # Prevents the package from being accidentally published to pub.dev
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  supabase_flutter: ^2.5.8
   google_fonts: ^6.2.1
   material_design_icons_flutter: ^7.0.7296
   flutter_svg: ^2.0.10+1
@@ -21,10 +22,17 @@ dependencies:
   syncfusion_flutter_gauges: ^26.2.11
   on_audio_query: ^2.9.0
   get: ^4.6.6
+  collection: ^1.18.0
   permission_handler: ^11.3.1
   just_audio: ^0.9.40
   firebase_core: ^2.24.2
   cloud_firestore: ^4.14.0
+ # firebase_auth: ^4.16.0
+  firebase_auth: ^4.17.5
+
+dependency_overrides:
+  on_audio_query_android:
+    path: third_party/on_audio_query_android
 
 dev_dependencies:
   flutter_test:
@@ -35,9 +43,10 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/    # Ensure this folder exists and contains your images
-    - assets/icons/ 
-    - assets/icons/backbutton.jpeg    # Ensure this folder exists and contains your icons
+    - assets/images/ # Ensure this folder exists and contains your images
+    - assets/icons/
+    - assets/icons/backbutton.jpeg # Ensure this folder exists and contains your icons
+
 
   # To add custom fonts, uncomment and configure the fonts section if needed
   # fonts:

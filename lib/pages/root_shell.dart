@@ -7,7 +7,10 @@ import 'package:music_player/controller/songPlayerController.dart';
 import 'package:music_player/pages/favorites_page.dart';
 import 'package:music_player/pages/playlists_page.dart';
 import 'package:music_player/pages/song_page.dart';
+import 'package:music_player/pages/profile_screen.dart';
 import 'package:music_player/component/songAndVolume.dart';
+import 'package:music_player/services/supabase_client.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RootShell extends StatefulWidget {
   const RootShell({super.key});
@@ -18,6 +21,7 @@ class RootShell extends StatefulWidget {
 
 class _RootShellState extends State<RootShell> {
   int _index = 0;
+  final _supabase = SupabaseService.client;
 
   @override
   void initState() {
@@ -26,6 +30,24 @@ class _RootShellState extends State<RootShell> {
     Get.put(Songplayercontroller(), permanent: true);
     Get.put(FavoritesController(), permanent: true);
     Get.put(PlaylistController(), permanent: true);
+    
+    // Listen to auth state changes and refresh data
+    _supabase.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      if (event == AuthChangeEvent.signedIn) {
+        // Refresh favorites and playlists when user signs in
+        final favoritesController = Get.find<FavoritesController>();
+        final playlistController = Get.find<PlaylistController>();
+        favoritesController.refreshFavorites();
+        playlistController.refreshPlaylists();
+      } else if (event == AuthChangeEvent.signedOut) {
+        // Clear data when user signs out
+        final favoritesController = Get.find<FavoritesController>();
+        final playlistController = Get.find<PlaylistController>();
+        favoritesController.favorites.clear();
+        playlistController.playlists.clear();
+      }
+    });
   }
 
   @override
@@ -36,6 +58,7 @@ class _RootShellState extends State<RootShell> {
       SongPage(),
       FavoritesPage(),
       PlaylistsPage(),
+      ProfileScreen(),
     ];
 
     return Scaffold(
@@ -49,7 +72,8 @@ class _RootShellState extends State<RootShell> {
               ),
             ),
             Obx(() {
-              final hasSong = playerController.currentSongTitle.value.isNotEmpty;
+              final hasSong =
+                  playerController.currentSongTitle.value.isNotEmpty;
               if (!hasSong) return const SizedBox.shrink();
               return _MiniPlayerBar(controller: playerController);
             }),
@@ -83,6 +107,8 @@ class _BottomNav extends StatelessWidget {
             icon: Icon(Icons.favorite_border), label: "Favorites"),
         BottomNavigationBarItem(
             icon: Icon(Icons.playlist_play), label: "Playlists"),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline), label: "Profile"),
       ],
     );
   }
