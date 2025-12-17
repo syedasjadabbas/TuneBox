@@ -9,6 +9,7 @@ class Songplayercontroller extends GetxController {
   RxBool isPlaying = false.obs;
   var currentSongTitle = ''.obs;
   RxString currentArtist = ''.obs;
+  Rxn<UnifiedSong> currentSong = Rxn<UnifiedSong>();
   RxString currentTime = "0:00".obs;
   RxString totalTime = "0:00".obs;
   RxBool isLoop = false.obs;
@@ -30,8 +31,9 @@ class Songplayercontroller extends GetxController {
       await player.setAudioSource(AudioSource.uri(Uri.parse(song.data)));
       player.play();
       isPlaying.value = true;
-       currentSongTitle.value = song.title;
-       currentArtist.value = song.artist ?? "";
+      currentSongTitle.value = song.title;
+      currentArtist.value = song.artist ?? "";
+      currentSong.value = UnifiedSong.fromLocal(song);
       updatePosition();
     } catch (e) {
       print("Error playing local audio: $e");
@@ -45,6 +47,7 @@ class Songplayercontroller extends GetxController {
       isPlaying.value = true;
       currentSongTitle.value = song.title;
       currentArtist.value = "Cloud track";
+      currentSong.value = UnifiedSong.fromCloud(song);
       updatePosition();
     } catch (e) {
       print("Error playing cloud audio: $e");
@@ -58,6 +61,7 @@ class Songplayercontroller extends GetxController {
       isPlaying.value = true;
       currentSongTitle.value = song.title;
       currentArtist.value = song.artist ?? "";
+      currentSong.value = song;
       updatePosition();
     } catch (e) {
       print("Error playing unified audio: $e");

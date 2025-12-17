@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:music_player/services/supabase_client.dart';
 import 'package:music_player/pages/auth/login_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:get/get.dart';
+import 'package:music_player/controller/theme_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -121,10 +123,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final currentUser = _supabase.auth.currentUser;
+    final themeController = Get.find<ThemeController>();
     
     if (currentUser == null) {
       return Scaffold(
-        backgroundColor: Color(0xFF1A1A1A),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -132,12 +135,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Icon(
                 Icons.person_outline,
                 size: 80,
-                color: Colors.white60,
+                color: Theme.of(context).textTheme.bodySmall?.color,
               ),
               SizedBox(height: 20),
               Text(
                 'Please sign in to view your profile',
-                style: TextStyle(color: Colors.white60),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: Theme.of(context).textTheme.bodySmall?.color),
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -157,29 +163,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (isLoading) {
       return Scaffold(
-        backgroundColor: Color(0xFF1A1A1A),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: Center(
           child: CircularProgressIndicator(
-            color: Color(0xFFFF6B6B),
+            color: Theme.of(context).colorScheme.primary,
           ),
         ),
       );
     }
 
     return Scaffold(
-      backgroundColor: Color(0xFF1A1A1A),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Color(0xFF1A1A1A),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
           'Profile',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(context).textTheme.titleMedium,
         ),
-        iconTheme: IconThemeData(color: Colors.white),
+        iconTheme: IconThemeData(color: Theme.of(context).iconTheme.color),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -200,7 +202,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: EdgeInsets.all(4),
                 child: CircleAvatar(
                   radius: 60,
-                  backgroundColor: Color(0xFF2D2D2D),
+                  backgroundColor: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFFF1F1F3)
+                      : const Color(0xFF2D2D2D),
                   backgroundImage: profilePhotoUrl.isNotEmpty
                       ? NetworkImage(profilePhotoUrl)
                       : null,
@@ -208,7 +212,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ? Icon(
                           Icons.person,
                           size: 60,
-                          color: Colors.white70,
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withOpacity(0.8),
                         )
                       : null,
                 ),
@@ -217,20 +225,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // User Name
               Text(
                 userName,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               SizedBox(height: 8),
               // User Email
               Text(
                 userEmail,
-                style: TextStyle(
-                  color: Colors.white60,
-                  fontSize: 16,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                      fontSize: 16,
+                    ),
               ),
               SizedBox(height: 30),
               // Edit Profile Button
@@ -266,11 +273,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               SizedBox(height: 40),
               // Profile Info Cards
-              _buildInfoCard('Account Info', Icons.info_outline),
+              _buildAccountCard(),
               SizedBox(height: 12),
-              _buildInfoCard('Settings', Icons.settings_outlined),
+              _buildSettingsCard(themeController),
               SizedBox(height: 12),
-              _buildInfoCard('Privacy Policy', Icons.privacy_tip_outlined),
+              _buildPrivacyCard(),
               SizedBox(height: 12),
               _buildLogoutCard(),
             ],
@@ -280,29 +287,146 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoCard(String title, IconData icon) {
+  Widget _buildAccountCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF2D2D2D),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: ListTile(
-        leading: Icon(icon, color: Color(0xFFFF6B6B)),
-        title: Text(
-          title,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              'Account',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
           ),
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          color: Colors.white38,
-          size: 16,
-        ),
-        onTap: () {
-          // Add navigation to respective screens
-        },
+          const Divider(height: 1, color: Colors.white12),
+          ListTile(
+            leading: Icon(Icons.alternate_email,
+                color: Theme.of(context).colorScheme.primary),
+            title: Text(
+              'Email',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            subtitle: Text(
+              userEmail,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.verified_user,
+                color: Theme.of(context).colorScheme.primary),
+            title: Text(
+              'Status',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            subtitle: Text(
+              'Signed in and synced',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.storage_rounded,
+                color: Theme.of(context).colorScheme.primary),
+            title: Text(
+              'Library',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            subtitle: Text(
+              'Favorites and playlists backed up to your account',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsCard(ThemeController themeController) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            child: Text(
+              'Settings',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          const Divider(height: 1, color: Colors.white12),
+          Obx(() => SwitchListTile(
+                value: themeController.isLightMode,
+                activeColor: Color(0xFFFF6B6B),
+                title: Text(
+                  'Light Mode',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                subtitle: Text(
+                  themeController.isLightMode
+                      ? 'Bright background and light surfaces'
+                      : 'Dimmed background and dark surfaces',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                onChanged: (value) => themeController.setLightMode(value),
+              )),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrivacyCard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Privacy Policy',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          _privacyRow(
+              'We only store your favorites/playlists with your account.'),
+          _privacyRow('Audio files stay on your device or cloud source.'),
+          _privacyRow('You can clear data anytime from settings.'),
+        ],
+      ),
+    );
+  }
+
+  Widget _privacyRow(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('• ',
+              style:
+                  Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 14)),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(fontSize: 14),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -310,7 +434,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildLogoutCard() {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF2D2D2D),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(

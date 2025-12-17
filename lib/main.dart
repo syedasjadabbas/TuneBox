@@ -1,10 +1,11 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get/get.dart';
 import 'package:music_player/config/theme.dart';
 import 'package:music_player/firebase_options.dart';
 import 'package:music_player/pages/root_shell.dart';
 import 'package:music_player/pages/auth/login_screen.dart';
+import 'package:music_player/controller/theme_controller.dart';
 import 'package:music_player/services/supabase_client.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -27,12 +28,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'TuneBox',
-      theme: darkTheme,
-      debugShowCheckedModeBanner: false,
-      home: const AuthWrapper(),
-    );
+    final themeController = Get.put(ThemeController(), permanent: true);
+    return Obx(() => GetMaterialApp(
+          title: 'TuneBox',
+          theme: lightTheme,
+          darkTheme: darkTheme,
+          themeMode: themeController.themeMode.value,
+          debugShowCheckedModeBanner: false,
+          home: const AuthWrapper(),
+        ));
   }
 }
 

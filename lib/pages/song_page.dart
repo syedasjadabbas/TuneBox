@@ -12,8 +12,22 @@ import 'package:music_player/model/mySongModel.dart';
 import 'package:music_player/model/song_item.dart';
 import 'package:on_audio_query/on_audio_query.dart';
 
-class SongPage extends StatelessWidget {
+class SongPage extends StatefulWidget {
   const SongPage({super.key});
+
+  @override
+  State<SongPage> createState() => _SongPageState();
+}
+
+class _SongPageState extends State<SongPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,36 +44,58 @@ class SongPage extends StatelessWidget {
           _Header(songDataController: songDataController),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: _SearchBar(),
+            child: _SearchBar(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.trim();
+                });
+              },
+            ),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: _SectionTitle(
               title: "All Songs",
-              action: Obx(() => Text(
-                    songDataController.isDeviceSong.value
-                        ? "${songDataController.localSongList.length} tracks"
-                        : "${cloudSongController.cloudSongList.length} tracks",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: label_color),
-                  )),
+              action: Obx(() {
+                final isDevice = songDataController.isDeviceSong.value;
+                final baseCount = isDevice
+                    ? songDataController.localSongList.length
+                    : cloudSongController.cloudSongList.length;
+                final filteredCount = _filteredSongs(
+                        isDevice ? songDataController.localSongList : null,
+                        isDevice ? null : cloudSongController.cloudSongList)
+                    .length;
+                final visibleCount =
+                    _searchQuery.isEmpty ? baseCount : filteredCount;
+
+                return Text(
+                  "$visibleCount tracks",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: label_color),
+                );
+              }),
             ),
           ),
           const SizedBox(height: 8),
           Expanded(
             child: Obx(() {
               final isDevice = songDataController.isDeviceSong.value;
-              if ((isDevice
-                      ? songDataController.localSongList
-                      : cloudSongController.cloudSongList)
-                  .isEmpty) {
+              final songs = _filteredSongs(
+                isDevice ? songDataController.localSongList : null,
+                isDevice ? null : cloudSongController.cloudSongList,
+              );
+
+              if (songs.isEmpty) {
                 return Center(
                   child: Text(
-                    isDevice
-                        ? "No local songs found."
-                        : "No cloud songs available.",
+                    _searchQuery.isEmpty
+                        ? (isDevice
+                            ? "No local songs found."
+                            : "No cloud songs available.")
+                        : "No songs match your search.",
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 );
@@ -68,49 +104,41 @@ class SongPage extends StatelessWidget {
               return ListView.builder(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                itemCount: isDevice
-                    ? songDataController.localSongList.length
-                    : cloudSongController.cloudSongList.length,
+                itemCount: songs.length,
                 itemBuilder: (context, index) {
-                  if (isDevice) {
-                    final SongModel song =
-                        songDataController.localSongList[index];
-                    final UnifiedSong unified = UnifiedSong.fromLocal(song);
+                  final song = songs[index];
+                  final UnifiedSong unified = song is SongModel
+                      ? UnifiedSong.fromLocal(song)
+                      : UnifiedSong.fromCloud(song as MySongModel);
+
+                  return Obx(() {
+                    final isFavorite =
+                        favoritesController.isFavorite(unified.idKey);
                     return SongTile(
-                      songName: song.title,
-                      subtitle: song.artist ?? "Local track",
+                      songName: unified.title,
+                      subtitle: unified.artist ??
+                          (unified.isLocal ? "Local track" : "Cloud track"),
                       onPress: () {
-                        songplayercontroller.playLocalAudio(song);
-                        songDataController.findCurrentPlayingSongId(song.id);
+                        if (unified.isLocal) {
+                          songplayercontroller
+                              .playLocalAudio(song as SongModel);
+                          songDataController
+                              .findCurrentPlayingSongId((song as SongModel).id);
+                        } else {
+                          songplayercontroller
+                              .playCloudAudio(song as MySongModel);
+                          songDataController.findCurrentPlayingSongId(
+                              (song as MySongModel).id);
+                        }
                         Get.to(const SongAndVolume());
                       },
                       onToggleFavorite: () =>
                           favoritesController.toggleFavorite(unified),
-                      isFavorite:
-                          favoritesController.isFavorite(unified.idKey),
+                      isFavorite: isFavorite,
                       onAddToPlaylist: () => showAddToPlaylistSheet(
                           context, playlistController, unified),
                     );
-                  } else {
-                    final MySongModel song =
-                        cloudSongController.cloudSongList[index];
-                    final UnifiedSong unified = UnifiedSong.fromCloud(song);
-                    return SongTile(
-                      songName: song.title,
-                      subtitle: "Cloud track",
-                      onPress: () {
-                        songplayercontroller.playCloudAudio(song);
-                        songDataController.findCurrentPlayingSongId(song.id);
-                        Get.to(const SongAndVolume());
-                      },
-                      onToggleFavorite: () =>
-                          favoritesController.toggleFavorite(unified),
-                      isFavorite:
-                          favoritesController.isFavorite(unified.idKey),
-                      onAddToPlaylist: () => showAddToPlaylistSheet(
-                          context, playlistController, unified),
-                    );
-                  }
+                  });
                 },
               );
             }),
@@ -118,6 +146,29 @@ class SongPage extends StatelessWidget {
         ],
       ),
     ));
+  }
+
+  List<dynamic> _filteredSongs(
+      List<SongModel>? localSongs, List<MySongModel>? cloudSongs) {
+    final query = _searchQuery.toLowerCase();
+    final List<dynamic> source = localSongs != null
+        ? List<dynamic>.from(localSongs)
+        : List<dynamic>.from(cloudSongs ?? []);
+
+    if (query.isEmpty) return source;
+
+    return source.where((song) {
+      if (song is SongModel) {
+        final title = song.title.toLowerCase();
+        final artist = (song.artist ?? '').toLowerCase();
+        return title.contains(query) || artist.contains(query);
+      } else if (song is MySongModel) {
+        final title = song.title.toLowerCase();
+        return title.contains(query);
+      }
+
+      return false;
+    }).toList();
   }
 }
 
@@ -332,25 +383,69 @@ class _ToggleChip extends StatelessWidget {
 }
 
 class _SearchBar extends StatelessWidget {
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  const _SearchBar({required this.controller, required this.onChanged});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: div_color,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
-          const Icon(Icons.search, color: label_color),
+          Icon(Icons.search,
+              color: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.color
+                  ?.withOpacity(0.8)),
           const SizedBox(width: 10),
-          Text(
-            "Search your music...",
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: label_color),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              onChanged: onChanged,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.color
+                        ?.withOpacity(0.9),
+                    fontSize: 14,
+                  ),
+              decoration: InputDecoration(
+                hintText: "Search your music...",
+                hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.color
+                          ?.withOpacity(0.6),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                border: InputBorder.none,
+                isDense: true,
+              ),
+            ),
           ),
+          if (controller.text.isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                controller.clear();
+                onChanged('');
+              },
+              child: Icon(Icons.close,
+                  color: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.color
+                      ?.withOpacity(0.7),
+                  size: 18),
+            )
         ],
       ),
     );

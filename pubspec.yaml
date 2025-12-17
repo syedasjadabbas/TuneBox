@@ -29,6 +29,7 @@ dependencies:
   cloud_firestore: ^4.14.0
  # firebase_auth: ^4.16.0
   firebase_auth: ^4.17.5
+  shared_preferences: ^2.3.2
 
 dependency_overrides:
   on_audio_query_android:

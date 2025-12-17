@@ -20,6 +20,12 @@ class SongTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final cardColor = Theme.of(context).cardColor;
+    final iconContainerColor =
+        isLight ? Colors.black.withOpacity(0.05) : Colors.white.withOpacity(0.06);
+    final iconDefaultColor = isLight ? Colors.black87 : Colors.white;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: InkWell(
@@ -28,7 +34,7 @@ class SongTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: div_color,
+            color: cardColor,
             borderRadius: BorderRadius.circular(14),
           ),
           child: Row(
@@ -71,16 +77,21 @@ class SongTile extends StatelessWidget {
                   if (onAddToPlaylist != null)
                     _ActionIcon(
                       icon: Icons.playlist_add,
+                      background: iconContainerColor,
+                      color: iconDefaultColor,
                       onTap: onAddToPlaylist!,
                     ),
                   if (onToggleFavorite != null)
                     _ActionIcon(
                       icon: isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: isFavorite ? primary_color : Colors.white,
+                      color: isFavorite ? Colors.redAccent : iconDefaultColor,
+                      isActive: isFavorite,
+                      background: iconContainerColor,
                       onTap: onToggleFavorite!,
                     ),
                   _ActionIcon(
                     icon: Icons.play_arrow_rounded,
+                    background: iconContainerColor,
                     onTap: onPress,
                     color: primary_color,
                   ),
@@ -97,26 +108,40 @@ class SongTile extends StatelessWidget {
 class _ActionIcon extends StatelessWidget {
   final IconData icon;
   final Color? color;
+  final bool isActive;
+  final Color? background;
   final VoidCallback onTap;
   const _ActionIcon(
-      {required this.icon, required this.onTap, this.color = Colors.white});
+      {required this.icon,
+      required this.onTap,
+      this.color,
+      this.background,
+      this.isActive = false});
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       borderRadius: BorderRadius.circular(10),
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
         margin: const EdgeInsets.only(left: 6),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.06),
+          color: isActive
+              ? (background ?? Colors.white.withOpacity(0.14))
+              : (background ?? Colors.white.withOpacity(0.06)),
           borderRadius: BorderRadius.circular(10),
         ),
-        child: Icon(
-          icon,
-          size: 18,
-          color: color,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 120),
+          child: Icon(
+            key: ValueKey(icon.codePoint + (isActive ? 1 : 0)),
+            icon,
+            size: 18,
+            color: color ?? Theme.of(context).iconTheme.color,
+          ),
         ),
       ),
     );

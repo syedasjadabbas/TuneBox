@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:music_player/config/colors.dart';
+import 'package:music_player/controller/favorites_controller.dart';
 import 'package:music_player/controller/songPlayerController.dart';
 import 'package:music_player/controller/songdatacontroller.dart';
 
@@ -13,12 +14,12 @@ class SongAndVolume extends StatefulWidget {
 
 class _SongAndVolumeState extends State<SongAndVolume> {
   double _volumeValue = 50;
-  double _sliderValue = 0.0;
 
   @override
   Widget build(BuildContext context) {
     SongDataController songDataController = Get.put(SongDataController());
     final Songplayercontroller songplayercontroller = Get.find();
+    final FavoritesController favoritesController = Get.find();
 
     return Scaffold(
       body: Stack(
@@ -75,16 +76,21 @@ class _SongAndVolumeState extends State<SongAndVolume> {
                       Obx(
                         () => Column(
                           children: [
-                            Text(
-                              songplayercontroller.currentSongTitle.value.isEmpty
-                                  ? "Unknown Track"
-                                  : songplayercontroller.currentSongTitle.value,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
+                    Text(
+                      songplayercontroller.currentSongTitle.value.isEmpty
+                          ? "Unknown Track"
+                          : songplayercontroller.currentSongTitle.value,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(
+                              fontSize: 22,
+                              color: Theme.of(context)
                                   .textTheme
                                   .titleMedium
-                                  ?.copyWith(fontSize: 22),
-                            ),
+                                  ?.color),
+                    ),
                             const SizedBox(height: 6),
                             Text(
                               songplayercontroller.currentArtist.value.isEmpty
@@ -93,7 +99,11 @@ class _SongAndVolumeState extends State<SongAndVolume> {
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
-                                  ?.copyWith(color: label_color),
+                                  ?.copyWith(
+                                      color: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.color),
                             ),
                           ],
                         ),
@@ -116,12 +126,15 @@ class _SongAndVolumeState extends State<SongAndVolume> {
                               divisions: max > 0 ? max.toInt() : null,
                               label: '${currentPosition.toInt()}s',
                               onChanged: (value) {
-                                setState(() {
-                                  _sliderValue = value;
-                                });
                                 songplayercontroller
                                     .changeDurationToSecond(value.toInt());
                               },
+                              activeColor:
+                                  Theme.of(context).colorScheme.primary,
+                              inactiveColor: Theme.of(context)
+                                  .colorScheme
+                                  .primary
+                                  .withOpacity(0.3),
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -144,9 +157,14 @@ class _SongAndVolumeState extends State<SongAndVolume> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.skip_previous_rounded),
+                            icon: Icon(
+                              Icons.skip_previous_rounded,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.black87
+                                  : Colors.white,
+                            ),
                             iconSize: 40,
-                            color: Colors.white,
                             onPressed: () {
                               songDataController.playPreviousSong();
                             },
@@ -177,9 +195,14 @@ class _SongAndVolumeState extends State<SongAndVolume> {
                           ),
                           const SizedBox(width: 12),
                           IconButton(
-                            icon: const Icon(Icons.skip_next_rounded),
+                            icon: Icon(
+                              Icons.skip_next_rounded,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.light
+                                  ? Colors.black87
+                                  : Colors.white,
+                            ),
                             iconSize: 40,
-                            color: Colors.white,
                             onPressed: () {
                               songDataController.playNextSong();
                             },
@@ -196,6 +219,7 @@ class _SongAndVolumeState extends State<SongAndVolume> {
                                   ? Icons.shuffle_on
                                   : Icons.shuffle,
                               active: songplayercontroller.isShuffled.value,
+                              label: "Shuffle",
                               onTap: () => songplayercontroller.playRandomSong(),
                             ),
                           ),
@@ -205,23 +229,44 @@ class _SongAndVolumeState extends State<SongAndVolume> {
                                   ? Icons.repeat_on
                                   : Icons.repeat_one,
                               active: songplayercontroller.isLoop.value,
+                              label: "Repeat",
                               onTap: () => songplayercontroller.setLoopSong(),
                             ),
                           ),
                           _CircleIconButton(
                             icon: Icons.volume_up,
                             active: false,
+                            label: "Volume",
                             onTap: () =>
                                 _showVolumeDialog(context, songplayercontroller),
                           ),
-                          _CircleIconButton(
-                            icon: Icons.favorite_border,
-                            active: false,
-                            onTap: () {},
-                          ),
+                          Obx(() {
+                            final currentSong =
+                                songplayercontroller.currentSong.value;
+                            final isFavorite = currentSong != null &&
+                                favoritesController
+                                    .isFavorite(currentSong.idKey);
+                            return _CircleIconButton(
+                              icon: isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              active: isFavorite,
+                              label: "Favorite",
+                              onTap: () {
+                                if (currentSong != null) {
+                                  favoritesController
+                                      .toggleFavorite(currentSong);
+                                } else {
+                                  Get.snackbar(
+                                      'No song', 'Play a song first.');
+                                }
+                              },
+                            );
+                          }),
                         ],
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                     ],
                   ),
                 ),
@@ -287,7 +332,7 @@ class _ArtworkPlaceholder extends StatelessWidget {
       width: double.infinity,
       height: 260,
       decoration: BoxDecoration(
-        color: div_color,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(18),
       ),
       child: const Center(
@@ -305,12 +350,17 @@ class _CircleIconButton extends StatelessWidget {
   final IconData icon;
   final bool active;
   final VoidCallback onTap;
+  final String label;
   const _CircleIconButton(
-      {required this.icon, required this.active, required this.onTap});
+      {required this.icon,
+      required this.active,
+      required this.onTap,
+      this.label = ''});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    final isLight = Theme.of(context).brightness == Brightness.light;
+    final button = InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
@@ -318,14 +368,21 @@ class _CircleIconButton extends StatelessWidget {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: active
-              ? primary_color.withOpacity(0.18)
-              : Colors.white.withOpacity(0.08),
+              ? primary_color.withOpacity(isLight ? 0.15 : 0.18)
+              : (isLight
+                  ? Colors.black.withOpacity(0.06)
+                  : Colors.white.withOpacity(0.08)),
         ),
         child: Icon(
           icon,
-          color: active ? primary_color : Colors.white,
+          color: active
+              ? primary_color
+              : (isLight ? Colors.black87 : Colors.white),
         ),
       ),
     );
+
+    if (label.isEmpty) return button;
+    return Tooltip(message: label, child: button);
   }
 }

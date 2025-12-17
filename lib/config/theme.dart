@@ -64,3 +64,67 @@ final darkTheme = ThemeData(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
   ),
 );
+
+final lightTheme = ThemeData(
+  useMaterial3: true,
+  brightness: Brightness.light,
+  scaffoldBackgroundColor: const Color(0xFFF4F4F6),
+  colorScheme: const ColorScheme.light(
+    surface: Colors.white,
+    primary: primary_color,
+    secondary: primary_color,
+  ),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    iconTheme: IconThemeData(color: Colors.black87),
+  ),
+  textTheme: const TextTheme(
+    bodyLarge: TextStyle(
+      fontFamily: "Poppins",
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
+    ),
+    bodyMedium: TextStyle(
+      fontFamily: "Poppins",
+      fontSize: 16,
+      fontWeight: FontWeight.w500,
+      color: Colors.black87,
+    ),
+    bodySmall: TextStyle(
+      fontFamily: "Poppins",
+      fontSize: 13,
+      fontWeight: FontWeight.w400,
+      color: Colors.black54,
+    ),
+    titleLarge: TextStyle(
+      fontFamily: "Poppins",
+      fontSize: 24,
+      fontWeight: FontWeight.w700,
+      color: Colors.black,
+    ),
+    titleMedium: TextStyle(
+      fontFamily: "Poppins",
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: Colors.black87,
+    ),
+    labelMedium: TextStyle(
+      fontFamily: "Poppins",
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: Colors.black54,
+    ),
+  ),
+  sliderTheme: SliderThemeData(
+    activeTrackColor: primary_color,
+    inactiveTrackColor: Colors.black26,
+    thumbColor: primary_color,
+  ),
+  cardTheme: CardThemeData(
+    color: Colors.white,
+    elevation: 1,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  ),
+);

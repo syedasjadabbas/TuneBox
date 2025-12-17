@@ -97,9 +97,13 @@ class _BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       currentIndex: currentIndex,
-      backgroundColor: div_color,
+      backgroundColor: Theme.of(context).brightness == Brightness.light
+          ? Colors.white
+          : div_color,
       selectedItemColor: primary_color,
-      unselectedItemColor: label_color,
+      unselectedItemColor: Theme.of(context).brightness == Brightness.light
+          ? Colors.black54
+          : label_color,
       onTap: onTap,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: "Home"),
@@ -121,11 +125,27 @@ class _MiniPlayerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: EdgeInsets.zero,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: div_color,
-        borderRadius: BorderRadius.circular(14),
+        color: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : const Color(0xFF2F313A),
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.light
+              ? Colors.black.withOpacity(0.05)
+              : Colors.white.withOpacity(0.05),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(
+                Theme.of(context).brightness == Brightness.light ? 0.04 : 0.12),
+            blurRadius: 4,
+            offset: const Offset(0, -1),
+          )
+        ],
       ),
       child: Row(
         children: [
@@ -133,7 +153,9 @@ class _MiniPlayerBar extends StatelessWidget {
             height: 44,
             width: 44,
             decoration: BoxDecoration(
-              color: primary_color.withOpacity(0.16),
+              color: Theme.of(context).brightness == Brightness.light
+                  ? primary_color.withOpacity(0.10)
+                  : primary_color.withOpacity(0.16),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.music_note, color: primary_color),
@@ -157,7 +179,12 @@ class _MiniPlayerBar extends StatelessWidget {
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
-                          ?.copyWith(color: label_color),
+                          ?.copyWith(
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.color
+                                  ?.withOpacity(0.8)),
                     )
                   ],
                 )),
@@ -180,7 +207,8 @@ class _MiniPlayerBar extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.open_in_full, color: Colors.white),
+            icon: Icon(Icons.open_in_full,
+                color: Theme.of(context).iconTheme.color),
             onPressed: () => Get.to(const SongAndVolume()),
           )
         ],
