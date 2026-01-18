@@ -1,16 +1,31 @@
-# music_player
+TuneBox is a Flutter-based music player application developed as a Mobile Application Development lab final project.
 
-A new Flutter project.
+The app allows users to play local and cloud-based audio, manage playlists, mark favorites, and customize the app theme. It focuses on smooth user experience, clean UI, and proper state management.
 
-## Getting Started
+Key features.
+• User authentication using Supabase
+• Music playback using just_audio
+• Local music access using on_audio_query
+• Favorites and playlists stored persistently
+• Light and dark theme support
+• Profile management with edit and logout
+• Reactive state management using GetX
 
-This project is a starting point for a Flutter application.
+Technologies used.
+• Flutter
+• Dart
+• GetX
+• Supabase
+• Firebase
+• SharedPreferences
 
-A few resources to get you started if this is your first Flutter project:
+Project structure.
+• Pages handle UI screens
+• Controllers manage logic and state
+• Models define data structures
+• Config contains theme and colors
+• Services manage backend connections
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+This project demonstrates practical implementation of navigation, state management, persistent storage, backend integration, and UI customization in Flutter.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Developed as part of an academic lab project.
