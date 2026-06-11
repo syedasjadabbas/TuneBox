@@ -1,31 +1,65 @@
-TuneBox is a Flutter-based music player application developed as a Mobile Application Development lab final project.
+# TuneBox – Music Streaming Platform
 
-The app allows users to play local and cloud-based audio, manage playlists, mark favorites, and customize the app theme. It focuses on smooth user experience, clean UI, and proper state management.
+TuneBox is a Flutter-based music streaming application focused on scalable frontend architecture, reusable UI components, and smooth playback experience. The project was developed during my internship at Svype.
 
-Key features.
-• User authentication using Supabase
-• Music playback using just_audio
-• Local music access using on_audio_query
-• Favorites and playlists stored persistently
-• Light and dark theme support
-• Profile management with edit and logout
-• Reactive state management using GetX
+## Features
 
-Technologies used.
-• Flutter
-• Dart
-• GetX
-• Supabase
-• Firebase
-• SharedPreferences
+* Music playback system
+* Playlist management
+* REST API integration
+* Reusable UI component library
+* Responsive mobile UI
+* State management using Provider
+* User data synchronization
+* Optimized frontend workflows
 
-Project structure.
-• Pages handle UI screens
-• Controllers manage logic and state
-• Models define data structures
-• Config contains theme and colors
-• Services manage backend connections
+## Tech Stack
 
-This project demonstrates practical implementation of navigation, state management, persistent storage, backend integration, and UI customization in Flutter.
+### Frontend
 
-Developed as part of an academic lab project.
+* Flutter
+* Dart
+
+### Backend Integration
+
+* REST APIs
+
+### State Management
+
+* Provider
+
+### Tools
+
+* Git
+* Postman
+
+## Responsibilities
+
+* Built and maintained frontend UI screens
+* Integrated REST APIs for playback and user data
+* Improved state management workflows
+* Resolved rendering and UI consistency issues
+* Developed reusable audio control and playlist components
+* Collaborated on API integration testing using Postman
+
+## Architecture Highlights
+
+* Modular component structure
+* Reusable widget-based UI system
+* Scalable state management approach
+* API-driven frontend workflows
+
+## Screenshots
+
+Add application screenshots here.
+
+## Future Improvements
+
+* Offline playback support
+* Audio caching optimization
+* Dockerized backend deployment
+* Real-time recommendation engine
+
+## Author
+
+SYED ASJAD ABBAS
