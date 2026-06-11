@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.png" alt="TuneBox Banner" />
+</p>
+
 # TuneBox
 
 A production-oriented Flutter music streaming application that demonstrates scalable frontend architecture, reusable UI systems, and reliable REST API integration for real-world mobile product development.
